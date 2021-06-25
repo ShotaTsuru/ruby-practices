@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'optparse'
 require 'Date'
 require 'Paint'
