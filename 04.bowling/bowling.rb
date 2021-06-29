@@ -33,7 +33,7 @@ class Frame
   end
 end
 
-input_score = Score.new if ARGV[0].nil?
+input_score = Score.new unless ARGV[0].nil?
 game = []
 input_score.frame_score.each_slice(2) do |a|
   game << a
