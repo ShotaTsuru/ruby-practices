@@ -4,103 +4,59 @@ require 'optparse'
 require 'Date'
 require 'Paint'
 
+def aset_week(week_day)
+  week_case = EMPTY_ARRAY7.clone
+  7.times do |i|
+    wday_num = week_day.wday + i
+    date = week_day.day + i
+    week_case[wday_num] = date if wday_num <= 6 && date <= LAST_DAY.day
+  end
+  week_case
+end
+
+def two_digit_conversion_and_color_inversion(array)
+  aset_array = []
+  array.each do |x|
+    num = ''
+    if x.to_s.length != 2
+      num = " #{x.to_s}"
+    else
+      num = x.to_s
+    end
+    num = Paint[num, :inverse] if num.to_i == Date.today.day && FIRST_WEEK_DAY.year == Date.today.year && FIRST_WEEK_DAY.month == Date.today.month
+    aset_array << num
+  end
+  aset_array
+end
+
 today = Date.today
 year = today.year
 month = today.month
 
-
 params = {}
-
-# opt.on('-m') {|v| v }
-# opt.on('-y') {|v| v }
-
-# opt.parse!(ARGV, into: params)
 params = ARGV.getopts("m:","y:")
 
-month = params["m"] unless params["m"] == nil
-year = params["y"] unless params["y"] == nil
+month = params["m"] if params["m"]
+year = params["y"] if params["y"]
 
-First_week_day = Date.new(year.to_i, month.to_i, 1)
-Last_day = Date.new(year.to_i, month.to_i, -1)
+FIRST_WEEK_DAY = Date.new(year.to_i, month.to_i, 1)
+LAST_DAY = Date.new(year.to_i, month.to_i, -1)
+EMPTY_ARRAY7 = ['  ','  ','  ','  ','  ','  ','  ']
+week = ['日', '月', '火', '水', '木', '金', '土']
 
+all_week_array = [aset_week(FIRST_WEEK_DAY)]
 
-week = ["日", "月", "火", "水", "木", "金", "土"]
-week_case = ["  ","  ","  ","  ","  ","  ","  "]
-
-def set_case
-  week_case = ["  ","  ","  ","  ","  ","  ","  "]
-end
-
-def set_week(week_day)
-  week_case = ["  ","  ","  ","  ","  ","  ","  "]
-  7.times do |i|
-    x = week_day.wday + i
-    y = week_day.day + i
-    week_case[x] = y if x <= 6 && y <= Last_day.day
+5.times do |i|
+  if i == 4 && all_week_array[i][-1].to_s.match?(/\s/) || all_week_array[i][-1] == LAST_DAY.day
+    all_week_array << EMPTY_ARRAY7
+  else
+    week_end_num = FIRST_WEEK_DAY + all_week_array[i][-1]
+    all_week_array << aset_week(week_end_num)
   end
-  return week_case
 end
-
-def set_string_num(array)
-  aset_array = []
-  array.each do |x|
-
-    num = ""
-    if x.to_s.length != 2 
-      num = " " + x.to_s 
-      num = Paint[num, :inverse] if num.to_i == Date.today.day && First_week_day.year == Date.today.year && First_week_day.month == Date.today.month
-     
-    else
-      num = x.to_s
-      num = Paint[num, :inverse] if num.to_i == Date.today.day && First_week_day.year ==  Date.today.year && First_week_day.month == Date.today.month
-    end
-    aset_array << num  
-  end
-  return aset_array
-end
-
-first = set_week(First_week_day)
-
-
-second_week_day = First_week_day + first[-1]
-set_case
-second = set_week(second_week_day)
-
-
-third_week_day = First_week_day + second[-1]
-set_case
-third = set_week(third_week_day)
-
-
-fourth_week_day = First_week_day + third[-1]
-set_case
-fourth = set_week(fourth_week_day)
-
-
-fifth_week_day = First_week_day + fourth[-1]
-set_case
-fifth = set_week(fifth_week_day)
-
-if fifth[-1].to_s =~ /^[0-9]+$/ || fifth[-1] == 31
-six_week_day = First_week_day + fifth[-1] 
-set_case
-six = set_week(six_week_day)
-end
-
-
-
-first_w = set_string_num(first)
-second_w = set_string_num(second)
-third_w = set_string_num(third)
-fourth_w = set_string_num(fourth)
-fifth_w = set_string_num(fifth)
-six_w = set_string_num(six) unless six == nil
 
 puts "      #{month}月 #{year}"
-puts week.join(" ")
-puts first_w.join(" ")
-puts second_w.join(" ")
-puts third_w.join(" ")
-puts fourth_w.join(" ")
-puts fifth_w.join(" ")
-puts six_w&.join(" ") 
+puts week.join(' ')
+all_week_array.each do |week_case|
+  puts two_digit_conversion_and_color_inversion(week_case).join(' ') if week_case
+end
