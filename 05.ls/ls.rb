@@ -48,20 +48,7 @@ class Command
 
   def l_opt(files_name)
     files_status = files_name.map { |file_name| File::Stat.new(file_name) }
-    array = files_status.map.with_index do |file_status, i|
-      {
-        type: File.ftype(files_name[0]), # ファイルタイプ
-        permission: file_status.mode.to_s(8), # 権限
-        nlink: file_status.nlink, # ハードリンクの数
-        user: Etc.getpwuid(files_status[0].uid).name, # オーナー名
-        group: Etc.getgrgid(files_status[0].gid).name, # グループ名
-        size: file_status.size, # バイトサイズ
-        time: file_status.mtime.to_s.match(/(\d{2})-(\d{2}) (\d{2}:\d{2})/).to_a.values_at(1, 2, 3), # タイムスタンプ
-        file_name: files_name[i], # ファイル名
-        blocks: file_status.blocks # ブロックサイズ
-      }
-    end
-
+    array = status_extraction(files_status, files_name)
     parts = change_to_symbolic(array) # 権限の数字をシンボリックに変換
     parts.each_with_index { |x, i| array[i][:permission] = x } # 変換したシンボリックを配列のpermissionと交換
     total_blocks = 0
@@ -108,6 +95,22 @@ class Command
       '6' => 'rw-',
       '7' => 'rwx'
     }[number]
+  end
+
+  def status_extraction(files_status, files_name)
+    files_status.map.with_index do |file_status, i|
+      {
+        type: File.ftype(files_name[0]), # ファイルタイプ
+        permission: file_status.mode.to_s(8), # 権限
+        nlink: file_status.nlink, # ハードリンクの数
+        user: Etc.getpwuid(files_status[0].uid).name, # オーナー名
+        group: Etc.getgrgid(files_status[0].gid).name, # グループ名
+        size: file_status.size, # バイトサイズ
+        time: file_status.mtime.to_s.match(/(\d{2})-(\d{2}) (\d{2}:\d{2})/).to_a.values_at(1, 2, 3), # タイムスタンプ
+        file_name: files_name[i], # ファイル名
+        blocks: file_status.blocks # ブロックサイズ
+      }
+    end
   end
 end
 
