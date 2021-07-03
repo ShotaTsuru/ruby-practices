@@ -1,9 +1,11 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
+
 class Command
-  def wc_default(files) #オプションなしの出力
+  # オプションなしの出力
+  def wc_default(files)
     file_extraction(files).each do |file|
-        puts "      #{file[:n_lines]}      #{file[:words]}     #{file[:byte_size]} #{file[:file_name]}"
+      puts "      #{file[:n_lines]}      #{file[:words]}     #{file[:byte_size]} #{file[:file_name]}"
     end
   end
 
@@ -13,12 +15,12 @@ class Command
     end
   end
 
-  def didnot_get_file(l: nil)
+  def didnot_get_file(*)
     content = $stdin.read
     file = {
-    n_lines: content.count("\n"), #行数
-    words: content.split(' ').length, #単語数
-    byte_size: content.bytesize, #バイトサイズ
+      n_lines: content.count("\n"), # 行数
+      words: content.split(' ').length, # 単語数
+      byte_size: content.bytesize # バイトサイズ
     }
     if l
       puts "      #{file[:n_lines]}"
@@ -30,17 +32,16 @@ class Command
   private
 
   def file_extraction(files)
-    files_wc = files.map.with_index do |file, i|
-    content = File.read(file)
-    {
-    n_lines: content.count("\n"), #行数
-    words: content.split(' ').length, #単語数
-    byte_size: content.bytesize, #バイトサイズ
-    file_name: files[i]
-    }
+    files.map.with_index do |file, i|
+      content = File.read(file)
+      {
+        n_lines: content.count("\n"), # 行数
+        words: content.split(' ').length, # 単語数
+        byte_size: content.bytesize, # バイトサイズ
+        file_name: files[i]
+      }
     end
   end
-
 end
 
 if $PROGRAM_NAME == __FILE__
