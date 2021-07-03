@@ -58,7 +58,7 @@ class Command
         size: file_status.size, # バイトサイズ
         time: file_status.mtime.to_s.match(/(\d{2})-(\d{2}) (\d{2}:\d{2})/).to_a.values_at(1, 2, 3), # タイムスタンプ
         file_name: files_name[i], # ファイル名
-        blocks: file_status.blocks #ブロックサイズ
+        blocks: file_status.blocks # ブロックサイズ
       }
     end
 
