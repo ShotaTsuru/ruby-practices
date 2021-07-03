@@ -57,16 +57,22 @@ class Command
         group: Etc.getgrgid(files_status[0].gid).name, # グループ名
         size: file_status.size, # バイトサイズ
         time: file_status.mtime.to_s.match(/(\d{2})-(\d{2}) (\d{2}:\d{2})/).to_a.values_at(1, 2, 3), # タイムスタンプ
-        file_name: files_name[i] # ファイル名
+        file_name: files_name[i], # ファイル名
+        blocks: file_status.blocks #ブロックサイズ
       }
     end
 
     parts = change_to_symbolic(array) # 権限の数字をシンボリックに変換
     parts.each_with_index { |x, i| array[i][:permission] = x } # 変換したシンボリックを配列のpermissionと交換
+    total_blocks = 0
+    array.map do |file|
+      total_blocks += file[:blocks]
+    end
+    puts "total #{total_blocks}"
     array.each do |x|
       x[:size] = x[:size].to_s.rjust(5, ' ')
       x[:nlink] = x[:nlink].to_s.rjust(2, ' ')
-      puts "#{x[:permission]} #{x[:nlink]} #{x[:user]} #{x[:group]} #{x[:size]} #{x[:time].join(' ')} #{x[:file_name]}   "
+      puts "#{x[:permission]} #{x[:nlink]} #{x[:user]}  #{x[:group]} #{x[:size]} #{x[:time].join(' ')} #{x[:file_name]}"
     end
   end
 
