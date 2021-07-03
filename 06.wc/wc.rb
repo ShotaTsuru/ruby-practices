@@ -15,7 +15,7 @@ class Command
     end
   end
 
-  def didnot_get_file(*)
+  def didnot_get_file(l: nil)
     content = $stdin.read
     file = {
       n_lines: content.count("\n"), # 行数
