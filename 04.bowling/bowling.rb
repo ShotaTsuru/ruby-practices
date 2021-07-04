@@ -10,7 +10,7 @@ class Score
     # @resultscore = score.split(',').map{|s| s == 'X'? 10, 0 : s.to_i} 折りたたみ演算で記述したかったのですができず。
     score.split(',').each do |s|
       if s == 'X' # strike
-        @frame_score << 10
+        @frame_score << 10 # ここでXのときの返り値が10と0の2つ数字が欲しい為injectで実装が出来ませんでした。
         @frame_score << 0
       else
         @frame_score << s.to_i
@@ -28,58 +28,46 @@ class Frame
     @last_shot = 0
   end
 
-  def ajust_last_frame
+  def adjust_last_frame
     @shot_one + @shot_two + @last_shot
   end
 end
 
 input_score = Score.new unless ARGV[0].nil?
-game = []
-input_score.frame_score.each_slice(2) do |a|
-  game << a
-end
-
-frame_scores = []
-
-game.each_with_index do |frame, i|
-  frame_scores[i] = Frame.new(frame)
-end
+game = input_score.frame_score.each_slice(2).to_a
+frame_scores = game.map { |frame| Frame.new(frame) }.to_a
 
 result_score = 0
 
 if frame_scores[9].shot_one == 10 && frame_scores[10].shot_one == 10 # 10フレーム目の一投目と二投目がストライクのとき
-  frame_scores[9].last_shot = frame_scores[-1].shot_one
-  frame_scores[9].shot_two = frame_scores[-2].shot_one
-  frame_scores.pop(2) # ストライクであれば末尾配列２つが必要無くなる。
+  last_two_frames = frame_scores.pop(2) # ストライクであれば末尾配列２つが必要無くなる。
+  frame_scores[9].last_shot = last_two_frames.last.shot_one
+  frame_scores[9].shot_two = last_two_frames.first.shot_one
 elsif frame_scores[9].shot_one == 10 && frame_scores[10].shot_one != 10 # 10フレーム目の一投目のみストライクの時
-  frame_scores[9].last_shot = frame_scores[-1].shot_two
-  frame_scores[9].shot_two = frame_scores[-1].shot_one
-  frame_scores.pop(1) # ストライクでなければ3等目を入れている配列を消す
+  last_frame = frame_scores.pop
+  frame_scores[9].last_shot = last_frame.shot_two
+  frame_scores[9].shot_two = last_frame.shot_one
+# ストライクでなければ3等目を入れている配列を消す
 elsif frame_scores[9].shot_one + frame_scores[9].shot_two == 10 # 10フレーム目がスペアのとき
-  frame_scores[9].last_shot = frame_scores[-1].shot_one
-  frame_scores.pop(1)
+  last_frame = frame_scores.pop
+  frame_scores[9].last_shot = last_frame.shot_one
 end
 
 frame_scores.each_with_index do |score, i|
   case i
-  when 0..7
+  when 0..8
     result_score += score.shot_one + score.shot_two
-    if score.shot_one == 10 && frame_scores[i + 1].shot_one == 10 # 一投目がストラクかつ次のフレームもストライク
+    if i == 8 && score.shot_one == 10
+      result_score += frame_scores[9].shot_one + frame_scores[9].shot_two
+    elsif score.shot_one == 10 && frame_scores[i + 1].shot_one == 10 # 一投目がストラクかつ次のフレームもストライク
       result_score += frame_scores[i + 1].shot_one + frame_scores[i + 2].shot_one
     elsif score.shot_one == 10 # 一投目のみストライク
       result_score += frame_scores[i + 1].shot_one + frame_scores[i + 1].shot_two
     elsif score.shot_one + score.shot_two == 10 # スペア
       result_score += frame_scores[i + 1].shot_one
     end
-  when 8
-    result_score += score.shot_one + score.shot_two
-    if score.shot_one == 10
-      result_score += frame_scores[9].shot_one + frame_scores[9].shot_two
-    elsif score.shot_one + score.shot_two == 10
-      result_score += frame_scores[9].shot_one
-    end
   when 9
-    result_score += frame_scores[9].ajust_last_frame
+    result_score += frame_scores[9].adjust_last_frame
   end
 end
 
