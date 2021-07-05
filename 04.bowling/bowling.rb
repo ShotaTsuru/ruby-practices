@@ -6,14 +6,14 @@ class Score
 
   def initialize
     score = ARGV[0]
-    @frame_score = []
+
     # @resultscore = score.split(',').map{|s| s == 'X'? 10, 0 : s.to_i} 折りたたみ演算で記述したかったのですができず。
-    score.split(',').each do |s|
+    @frame_score = score.split(',').each_with_object([]) do |s, result|
       if s == 'X' # strike
-        @frame_score << 10 # ここでXのときの返り値が10と0の2つ数字が欲しい為injectで実装が出来ませんでした。
-        @frame_score << 0
+        result << 10 # ここでXのときの返り値が10と0の2つ数字が欲しい為injectで実装が出来ませんでした。
+        result << 0
       else
-        @frame_score << s.to_i
+        result << s.to_i
       end
     end
   end
