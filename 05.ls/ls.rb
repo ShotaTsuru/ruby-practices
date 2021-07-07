@@ -8,15 +8,12 @@ class Command
   #   ls_command(**option)
   # end
 
-  def command_exec(a: nil, l: nil, r: nil)
-    files_name = if a
-                   Dir.glob('*', File::FNM_DOTMATCH)
-                 else
-                   Dir.glob('*')
-                 end
-    files_name.reverse! if r
+  def exec(a_option = false, l_option = false, r_option = false)
+    files_name = a_option ? Dir.glob('*', File::FNM_DOTMATCH) : Dir.glob('*')
 
-    if l
+    files_name.reverse! if r_option
+
+    if l_option
       l_opt(files_name)
     else
       none_opt(files_name)
@@ -30,9 +27,8 @@ class Command
     files_num = files_name.length
     row_num = (files_num / 3.to_f).ceil
 
-    row_num.times do |_i|
-      row_array = []
-      array << row_array
+    row_num.times do
+      array << []
     end
 
     until files_name.empty?
@@ -41,45 +37,64 @@ class Command
         array[i] << files_name.shift unless files_name.empty?
       end
     end
-    row_num.times do |i|
-      puts array[i].map { |x| x.ljust(18, ' ') }.join('')
+
+    array.each do |i|
+      puts i.map { |x| x.ljust(18, ' ') }.join('')
     end
   end
 
   def l_opt(files_name)
     files_status = files_name.map { |file_name| File::Stat.new(file_name) }
-    array = status_extraction(files_status, files_name)
+    array = extract_status(files_status, files_name)
     parts = change_to_symbolic(array) # 権限の数字をシンボリックに変換
     parts.each_with_index { |x, i| array[i][:permission] = x } # 変換したシンボリックを配列のpermissionと交換
     total_blocks = 0
-    array.map do |file|
+    array.each do |file|
       total_blocks += file[:blocks]
     end
     puts "total #{total_blocks}"
     array.each do |x|
       x[:size] = x[:size].to_s.rjust(5, ' ')
       x[:nlink] = x[:nlink].to_s.rjust(2, ' ')
-      puts "#{x[:permission]} #{x[:nlink]} #{x[:user]}  #{x[:group]} #{x[:size]} #{x[:time].join(' ')} #{x[:file_name]}"
+      puts "#{x[:permission]}  #{x[:nlink]} #{x[:user]}  #{x[:group]} #{x[:size]} #{x[:time].join(' ')} #{x[:file_name]}"
+    end
+  end
+
+  def extract_status(files_status, files_name)
+    files_status.map.with_index do |file_status, i|
+      {
+        type: File.ftype(files_name[i]), # ファイルタイプ
+        permission: file_status.mode.to_s(8), # 権限
+        nlink: file_status.nlink, # ハードリンクの数
+        user: Etc.getpwuid(files_status[0].uid).name, # オーナー名
+        group: Etc.getgrgid(files_status[0].gid).name, # グループ名
+        size: file_status.size, # バイトサイズ
+        time: file_status.mtime.to_s.match(/(\d{2})-(\d{2}) (\d{2}:\d{2})/).to_a.values_at(1, 2, 3), # タイムスタンプ
+        file_name: files_name[i], # ファイル名
+        blocks: file_status.blocks # ブロックサイズ
+      }
     end
   end
 
   def change_to_symbolic(array)
     change_result = []
     array.each_with_index do |status, i|
-      permission = +''
+      symbolic = []
       case status[:type]
       when 'directory'
-        permission << 'd'
+        permission = 'd'
       when 'file'
-        permission << '-'
+        permission = '-'
       when 'link'
-        permission << 'l'
+        permission = 'l'
       end
-      results = /\d{2}(\d)(\d)(\d)/.match(array[i][:permission]).captures
-      permission << decide_permission(results[0])
-      permission << decide_permission(results[1])
-      permission << decide_permission(results[2])
-      change_result << permission
+      array[i][:permission].insert(0, '0') if array[i][:permission].length != 6
+      results = /\d{3}(\d)(\d)(\d)/.match(array[i][:permission]).captures
+      symbolic << permission
+      symbolic << decide_permission(results[0])
+      symbolic << decide_permission(results[1])
+      symbolic << decide_permission(results[2])
+      change_result << symbolic.join
     end
     change_result
   end
@@ -96,22 +111,6 @@ class Command
       '7' => 'rwx'
     }[number]
   end
-
-  def status_extraction(files_status, files_name)
-    files_status.map.with_index do |file_status, i|
-      {
-        type: File.ftype(files_name[0]), # ファイルタイプ
-        permission: file_status.mode.to_s(8), # 権限
-        nlink: file_status.nlink, # ハードリンクの数
-        user: Etc.getpwuid(files_status[0].uid).name, # オーナー名
-        group: Etc.getgrgid(files_status[0].gid).name, # グループ名
-        size: file_status.size, # バイトサイズ
-        time: file_status.mtime.to_s.match(/(\d{2})-(\d{2}) (\d{2}:\d{2})/).to_a.values_at(1, 2, 3), # タイムスタンプ
-        file_name: files_name[i], # ファイル名
-        blocks: file_status.blocks # ブロックサイズ
-      }
-    end
-  end
 end
 
 if $PROGRAM_NAME == __FILE__
@@ -124,6 +123,7 @@ if $PROGRAM_NAME == __FILE__
   opt.on('-l') { |v| params[:l] = v }
   opt.on('-r') { |v| params[:r] = v }
   opt.parse!(ARGV)
+
   received_command = Command.new
-  received_command.command_exec(**params)
+  received_command.exec(params[:a], params[:l], params[:n])
 end
