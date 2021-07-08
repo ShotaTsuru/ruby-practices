@@ -8,42 +8,42 @@ class Command
   #   ls_command(**option)
   # end
 
-  def exec(a_option = false, l_option = false, r_option = false)
+  def exec(a_option: false, l_option: false, r_option: false)
     files_name = a_option ? Dir.glob('*', File::FNM_DOTMATCH) : Dir.glob('*')
 
     files_name.reverse! if r_option
 
     if l_option
-      l_opt(files_name)
+      exec_l_opt(files_name)
     else
-      none_opt(files_name)
+      exec_default(files_name)
     end
   end
 
   private
 
-  def none_opt(files_name)
-    array = []
+  def exec_default(files_name)
+    row_array = []
     files_num = files_name.length
     row_num = (files_num / 3.to_f).ceil
 
     row_num.times do
-      array << []
+      row_array << []
     end
 
-    until files_name.empty?
+    until files_name.empty? # 表示させるファイル名の入った配列の中身が最後の一個であるが、一行目が３列作れてない時の処理
       row_num.times do |i|
-        array[0] << files_name.shift if array[0].length != 3 && files_name.length == 1
-        array[i] << files_name.shift unless files_name.empty?
+        row_array[0] << files_name.shift if row_array[0].length != 3 && files_name.length == 1
+        row_array[i] << files_name.shift unless files_name.empty?
       end
     end
 
-    array.each do |i|
+    row_array.each do |i|
       puts i.map { |x| x.ljust(18, ' ') }.join('')
     end
   end
 
-  def l_opt(files_name)
+  def exec_l_opt(files_name)
     files_status = files_name.map { |file_name| File::Stat.new(file_name) }
     array = extract_status(files_status, files_name)
     parts = change_to_symbolic(array) # 権限の数字をシンボリックに変換
@@ -125,5 +125,5 @@ if $PROGRAM_NAME == __FILE__
   opt.parse!(ARGV)
 
   received_command = Command.new
-  received_command.exec(params[:a], params[:l], params[:n])
+  received_command.exec(a_option: params[:a], l_option: params[:l], r_option: params[:r])
 end
