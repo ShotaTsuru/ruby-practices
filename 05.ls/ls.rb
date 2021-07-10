@@ -4,10 +4,6 @@
 require 'etc'
 
 class Command
-  # def command_exec(option)
-  #   ls_command(**option)
-  # end
-
   def exec(a_option: false, l_option: false, r_option: false)
     files_name = a_option ? Dir.glob('*', File::FNM_DOTMATCH) : Dir.glob('*')
 
@@ -23,37 +19,37 @@ class Command
   private
 
   def exec_default(files_name)
-    row_array = []
+    rows = []
     files_num = files_name.length
     row_num = (files_num / 3.to_f).ceil
 
     row_num.times do
-      row_array << []
+      rows << []
     end
 
-    until files_name.empty? # 表示させるファイル名の入った配列の中身が最後の一個であるが、一行目が３列作れてない時の処理
+    until files_name.empty? 
       row_num.times do |i|
-        row_array[0] << files_name.shift if row_array[0].length != 3 && files_name.length == 1
-        row_array[i] << files_name.shift unless files_name.empty?
+        # 表示させるファイル名の入った配列の中身が最後の一個であるが、一行目が３列作れてない時の処理
+        rows[0] << files_name.shift if rows[0].length != 3 && files_name.length == 1
+        rows[i] << files_name.shift unless files_name.empty?
       end
     end
 
-    row_array.each do |i|
+    rows.each do |i|
       puts i.map { |x| x.ljust(18, ' ') }.join('')
     end
   end
 
   def exec_l_opt(files_name)
     files_status = files_name.map { |file_name| File::Stat.new(file_name) }
-    array = extract_status(files_status, files_name)
-    parts = change_to_symbolic(array) # 権限の数字をシンボリックに変換
-    parts.each_with_index { |x, i| array[i][:permission] = x } # 変換したシンボリックを配列のpermissionと交換
-    total_blocks = 0
-    array.each do |file|
-      total_blocks += file[:blocks]
-    end
+    statuses = extract_status(files_status, files_name)
+     # 権限の数字をシンボリックに変換
+    parts = change_to_symbolic(statuses)
+    # 変換したシンボリックを配列のpermissionと交換
+    parts.each_with_index { |x, i| statuses[i][:permission] = x } 
+    total_blocks = statuses.map {|f| f[:blocks]}.sum
     puts "total #{total_blocks}"
-    array.each do |x|
+    statuses.each do |x|
       x[:size] = x[:size].to_s.rjust(5, ' ')
       x[:nlink] = x[:nlink].to_s.rjust(2, ' ')
       puts "#{x[:permission]}  #{x[:nlink]} #{x[:user]}  #{x[:group]} #{x[:size]} #{x[:time].join(' ')} #{x[:file_name]}"
@@ -76,9 +72,9 @@ class Command
     end
   end
 
-  def change_to_symbolic(array)
+  def change_to_symbolic(statuses)
     change_result = []
-    array.each_with_index do |status, i|
+    statuses.each_with_index do |status, i|
       symbolic = []
       case status[:type]
       when 'directory'
@@ -88,8 +84,8 @@ class Command
       when 'link'
         permission = 'l'
       end
-      array[i][:permission].insert(0, '0') if array[i][:permission].length != 6
-      results = /\d{3}(\d)(\d)(\d)/.match(array[i][:permission]).captures
+      statuses[i][:permission].insert(0, '0') if statuses[i][:permission].length != 6
+      results = /\d{3}(\d)(\d)(\d)/.match(statuses[i][:permission]).captures
       symbolic << permission
       symbolic << decide_permission(results[0])
       symbolic << decide_permission(results[1])
