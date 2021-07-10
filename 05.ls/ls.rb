@@ -27,7 +27,7 @@ class Command
       rows << []
     end
 
-    until files_name.empty? 
+    until files_name.empty?
       row_num.times do |i|
         # 表示させるファイル名の入った配列の中身が最後の一個であるが、一行目が３列作れてない時の処理
         rows[0] << files_name.shift if rows[0].length != 3 && files_name.length == 1
@@ -43,11 +43,11 @@ class Command
   def exec_l_opt(files_name)
     files_status = files_name.map { |file_name| File::Stat.new(file_name) }
     statuses = extract_status(files_status, files_name)
-     # 権限の数字をシンボリックに変換
+    # 権限の数字をシンボリックに変換
     parts = change_to_symbolic(statuses)
     # 変換したシンボリックを配列のpermissionと交換
-    parts.each_with_index { |x, i| statuses[i][:permission] = x } 
-    total_blocks = statuses.map {|f| f[:blocks]}.sum
+    parts.each_with_index { |x, i| statuses[i][:permission] = x }
+    total_blocks = statuses.map { |f| f[:blocks] }.sum
     puts "total #{total_blocks}"
     statuses.each do |x|
       x[:size] = x[:size].to_s.rjust(5, ' ')
