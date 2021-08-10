@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # 点数を入れて表示させる
-class shot
+class Shot
   attr_accessor :mark
   def initialize(mark)
     @mark = mark
