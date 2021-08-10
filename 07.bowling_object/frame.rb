@@ -14,7 +14,25 @@ class Frame
   def score
     [@first_shot.score, @second_shot.score].sum
   end
+
+  def spare?
+    if @first_shot.score + @second_shot.score == 10 && @second_shot.score != 0
+      true
+    else
+      false
+    end
+  end
+
+  def strike?
+    if @first_shot.score == 10
+      true
+    else
+      false
+    end
+  end
 end
 
 frame = Frame.new('X')
+
+frame2 = Frame.new('1', '9')
 puts frame.score
