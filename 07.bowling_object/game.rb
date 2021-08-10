@@ -40,13 +40,32 @@ class Game
   end
 
   def result_score
-    if @first_frame.spare?
+    @full_frame = [@first_frame, @second_frame, @third_frame, @fourth_frame, @fifth_frame, @sixth_frame, @seventh_frame, @eight_frame, @ninth_frame, @tenth_frame]
+    @full_frame.map.with_index do |frame, i|
+      if frame.spare?
+        sum_spare_score(frame, @full_frame[i + 1])
+      elsif frame.strike?
+        sum_strike_score(frame, @full_frame[i + 1], @full_frame[i + 2])
+      else
+        frame.score
+      end
     end
-
+  end
+  
+  def sum_spare_score(frame, next_frame)
+    frame.score + next_frame&.first_shot&.score.to_i
   end
 
+  def sum_strike_score(frame, next_frame = nil, after_next_frame = nil)
+    if next_frame&.strike? && @full_frame[-2] == frame
+      frame.score + next_frame.first_shot.score + next_frame.second_shot.score
+    elsif next_frame&.strike?
+      frame.score + next_frame&.first_shot&.score + after_next_frame&.first_shot&.score.to_i
+    else
+      frame.score + next_frame&.score.to_i
+    end
+  end
 end
 
 game =  Game.new(ARGV[0])
-
 puts game
