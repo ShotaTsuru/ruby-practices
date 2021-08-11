@@ -41,7 +41,7 @@ class Game
 
   def result_score
     @full_frame = [@first_frame, @second_frame, @third_frame, @fourth_frame, @fifth_frame, @sixth_frame, @seventh_frame, @eight_frame, @ninth_frame, @tenth_frame]
-    @full_frame.map.with_index do |frame, i|
+    after_adjustment = @full_frame.map.with_index do |frame, i|
       if frame.spare?
         sum_spare_score(frame, @full_frame[i + 1])
       elsif frame.strike?
@@ -50,6 +50,7 @@ class Game
         frame.score
       end
     end
+    puts after_adjustment.sum
   end
   
   def sum_spare_score(frame, next_frame)
@@ -60,12 +61,14 @@ class Game
     if next_frame&.strike? && @full_frame[-2] == frame
       frame.score + next_frame.first_shot.score + next_frame.second_shot.score
     elsif next_frame&.strike?
-      frame.score + next_frame&.first_shot&.score + after_next_frame&.first_shot&.score.to_i
+      # last frame用にぼっち演算子とぼっち演算子適応後の値nilをto_iで0に変換
+      frame.score + next_frame&.first_shot&.score.to_i + after_next_frame&.first_shot&.score.to_i
     else
-      frame.score + next_frame&.score.to_i
+      # last frame用にぼっち演算子とぼっち演算子適応後の値nilをto_iで0に変換
+      frame.score + next_frame&.first_shot&.score.to_i + next_frame&.second_shot&.score.to_i 
     end
   end
 end
 
 game =  Game.new(ARGV[0])
-puts game
+game.result_score

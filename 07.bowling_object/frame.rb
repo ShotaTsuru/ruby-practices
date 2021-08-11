@@ -35,8 +35,3 @@ class Frame
     end
   end
 end
-
-frame = Frame.new('X')
-
-frame2 = Frame.new('1', '9')
-puts frame.score
