@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-require './shot.rb'
+require './shot'
 
 class Frame
   attr_reader :first_shot, :second_shot, :third_shot
+
   # １フレーム1~3投の表示
   def initialize(first_mark, second_mark = nil, third_mark = nil)
     @first_shot = Shot.new(first_mark)
@@ -12,11 +13,7 @@ class Frame
   end
 
   def score
-    if @third_shot
-      [@first_shot.score, @second_shot.score, @third_shot.score].sum
-    else
-      [@first_shot.score, @second_shot.score].sum
-    end
+    [@first_shot.score, @second_shot.score, @third_shot.score].sum
   end
 
   def spare?
@@ -28,10 +25,6 @@ class Frame
   end
 
   def strike?
-    if @first_shot.score == 10
-      true
-    else
-      false
-    end
+    @first_shot.score == 10
   end
 end
