@@ -1,5 +1,96 @@
 # frozen_string_literal: true
 
 class Command
+  def exec(a_option: false, l_option: false, r_option: false)
+    files_name = a_option(a_option)
+    r_option(r_option, files_name)
+    l_option(l_option, files_name)
+  end
 
+  def a_option(a_option)
+    all_file = a_option ? Dir.glob('*', File::FNM_DOTMATCH) : Dir.glob('*')
+    all_file.map do |file|
+      FileEntry.new(file)
+    end
+  end
+
+  def r_option(r_option, files_name)
+    r_option ? files_name.reverse! : files_name
+  end
+
+  def l_option(l_option, files_name)
+    l_option ? exec_l_opt(files_name) : exec_default(files_name)
+  end
+
+  def exec_default(files_name)
+    rows = []
+    files_num = files_name.length
+    row_num = (files_num / 3.to_f).ceil
+
+    row_num.times do
+      rows << []
+    end
+
+    until files_name.empty?
+      row_num.times do |i|
+        # 表示させるファイル名の入った配列の中身が最後の一個であるが、一行目が３列作れてない時の処理
+        rows[0] << files_name.shift if rows[0].length != 3 && files_name.length == 1
+        rows[i] << files_name.shift unless files_name.empty?
+      end
+    end
+
+    rows.each do |i|
+      puts i.map { |x| x.file_name.ljust(18, ' ') }.join('')
+    end
+  end
+
+  def exec_l_opt(files_name)
+    # 権限の数字をシンボリックに変換
+    parts = change_to_symbolic(files_name)
+    # 変換したシンボリックをpermissionと交換
+    parts.each_with_index { |x, i| files_name[i].permission = x }
+    total_blocks = files_name.map(&:blocks).sum
+    puts "total #{total_blocks}"
+    files_name.each do |x|
+      x.size = x.size.to_s.rjust(5, ' ')
+      x.nlink = x.nlink.to_s.rjust(2, ' ')
+      puts "#{x.permission}  #{x.nlink} #{x.user}  #{x.group} #{x.size} #{x.time.join(' ')} #{x.file_name}"
+    end
+  end
+
+  def change_to_symbolic(statuses)
+    change_result = []
+    statuses.each_with_index do |status, i|
+      symbolic = []
+      case status.type
+      when 'directory'
+        permission = 'd'
+      when 'file'
+        permission = '-'
+      when 'link'
+        permission = 'l'
+      end
+      statuses[i].permission.insert(0, '0') if statuses[i].permission.length != 6
+      results = /\d{3}(\d)(\d)(\d)/.match(statuses[i].permission).captures
+      symbolic << permission
+      symbolic << decide_permission(results[0])
+      symbolic << decide_permission(results[1])
+      symbolic << decide_permission(results[2])
+      change_result << symbolic.join
+    end
+    change_result
+  end
+
+  def decide_permission(number)
+    {
+      '0' => '---',
+      '1' => '--x',
+      '2' => '-w-',
+      '3' => '-wx',
+      '4' => 'r--',
+      '5' => 'r-x',
+      '6' => 'rw-',
+      '7' => 'rwx'
+    }[number]
+  end
 end
