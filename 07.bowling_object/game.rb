@@ -47,9 +47,12 @@ class Game
     frame = []
     game_score.each do |s|
       frame << s
-      next unless frame.length == 2 || s == 'X' && frames.length < 9
+      # 2shot目もframeに入れて欲しい場合nextで2投目処理へnextする。
+      # frameが２shot入っていなくストライクではないとき、もしくは10フレーム目
+      next if frame.length != 2 && s != 'X' || frames.length > 9
 
       frames << frame
+      # 10フレーム目の処理は3投目もframeに入れるためnext処理
       next if frames.length == 10
 
       frame = []
@@ -62,16 +65,18 @@ class Game
   end
 
   def sum_strike_score(frame, next_frame = nil, after_next_frame = nil)
-    # last frameと9frame目、次フレームがストライクではない時の処理。
-    # next_frame&の処理でnilが返る＝last frame !nilでtrue処理へ。
-    if !next_frame&.strike? || @full_frame[-2] == frame
-      # last frame用にぼっち演算子とぼっち演算子適応後の値nilをto_iで0に変換
-      frame.score + next_frame&.first_shot&.score.to_i + next_frame&.second_shot&.score.to_i
-    else
+    # ラストフレームの処理
+    if @full_frame[-1] == frame
+      frame.score
+    # 9フレーム目もしくは、次フレームがストライクではない時の処理
+    elsif @full_frame[-2] == frame || !next_frame.strike?
+      frame.score + next_frame.first_shot.score + next_frame.second_shot.score
+    # 次フレームがストライクの時の処理（elsifで分岐することで明示的に次フレームがストライクの処理を表す）
+    elsif next_frame.strike?
       frame.score + next_frame.first_shot.score + after_next_frame.first_shot.score
     end
   end
 end
 
 game = Game.new(ARGV[0])
-game.calc_result_score
+game.score
