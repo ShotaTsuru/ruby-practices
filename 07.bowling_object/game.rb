@@ -21,7 +21,7 @@ class Game
     @tenth_frame = Frame.new(*sepalated_score[9])
   end
 
-  def calc_result_score
+  def score
     @full_frame = [@first_frame, @second_frame, @third_frame, @fourth_frame, @fifth_frame, @sixth_frame, @seventh_frame, @eight_frame, @ninth_frame,
                    @tenth_frame]
     after_adjustment = @full_frame.map.with_index do |frame, i|
