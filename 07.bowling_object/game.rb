@@ -21,6 +21,23 @@ class Game
     @tenth_frame = Frame.new(*sepalated_score[9])
   end
 
+  def calc_result_score
+    @full_frame = [@first_frame, @second_frame, @third_frame, @fourth_frame, @fifth_frame, @sixth_frame, @seventh_frame, @eight_frame, @ninth_frame,
+                   @tenth_frame]
+    after_adjustment = @full_frame.map.with_index do |frame, i|
+      if frame.spare?
+        sum_spare_score(frame, @full_frame[i + 1])
+      elsif frame.strike?
+        sum_strike_score(frame, @full_frame[i + 1], @full_frame[i + 2])
+      else
+        frame.score
+      end
+    end
+    puts after_adjustment.sum
+  end
+
+  private
+
   def take_in_game(game_score)
     game_score.split(',').map { |x| x == 'X' ? 'X' : x.to_i }
   end
@@ -38,21 +55,6 @@ class Game
       frame = []
     end
     frames
-  end
-
-  def calc_result_score
-    @full_frame = [@first_frame, @second_frame, @third_frame, @fourth_frame, @fifth_frame, @sixth_frame, @seventh_frame, @eight_frame, @ninth_frame,
-                   @tenth_frame]
-    after_adjustment = @full_frame.map.with_index do |frame, i|
-      if frame.spare?
-        sum_spare_score(frame, @full_frame[i + 1])
-      elsif frame.strike?
-        sum_strike_score(frame, @full_frame[i + 1], @full_frame[i + 2])
-      else
-        frame.score
-      end
-    end
-    puts after_adjustment.sum
   end
 
   def sum_spare_score(frame, next_frame)
