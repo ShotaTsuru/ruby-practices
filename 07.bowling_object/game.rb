@@ -3,32 +3,18 @@
 require './frame'
 
 class Game
-  attr_reader :first_frame, :second_frame, :third_frame, :fourth_frame, :fifth_frame, :sixth_frame, :seventh_frame,
-              :eight_frame, :ninth_frame, :tenth_frame
-
   def initialize(game_score)
     all_score = take_in_game(game_score)
     sepalated_score = separate_game_to_frame(all_score)
-    @first_frame = Frame.new(*sepalated_score[0])
-    @second_frame = Frame.new(*sepalated_score[1])
-    @third_frame = Frame.new(*sepalated_score[2])
-    @fourth_frame = Frame.new(*sepalated_score[3])
-    @fifth_frame = Frame.new(*sepalated_score[4])
-    @sixth_frame = Frame.new(*sepalated_score[5])
-    @seventh_frame = Frame.new(*sepalated_score[6])
-    @eight_frame = Frame.new(*sepalated_score[7])
-    @ninth_frame = Frame.new(*sepalated_score[8])
-    @tenth_frame = Frame.new(*sepalated_score[9])
+    @frames = sepalated_score.map { |s| Frame.new(*s) }
   end
-
+  
   def score
-    @full_frame = [@first_frame, @second_frame, @third_frame, @fourth_frame, @fifth_frame, @sixth_frame, @seventh_frame, @eight_frame, @ninth_frame,
-                   @tenth_frame]
-    after_adjustment = @full_frame.map.with_index do |frame, i|
+    after_adjustment = @frames.map.with_index do |frame, i|
       if frame.spare?
-        sum_spare_score(frame, @full_frame[i + 1])
+        sum_spare_score(frame, @frames[i + 1])
       elsif frame.strike?
-        sum_strike_score(frame, @full_frame[i + 1], @full_frame[i + 2])
+        sum_strike_score(frame, @frames[i + 1], @frames[i + 2])
       else
         frame.score
       end
@@ -63,13 +49,13 @@ class Game
   def sum_spare_score(frame, next_frame)
     frame.score + next_frame&.first_shot&.score.to_i
   end
-
+  
   def sum_strike_score(frame, next_frame = nil, after_next_frame = nil)
     # ラストフレームの処理
-    if @full_frame[-1] == frame
+    if @frames[-1] == frame
       frame.score
     # 9フレーム目もしくは、次フレームがストライクではない時の処理
-    elsif @full_frame[-2] == frame || !next_frame.strike?
+    elsif @frames[-2] == frame || !next_frame.strike?
       frame.score + next_frame.first_shot.score + next_frame.second_shot.score
     # 次フレームがストライクの時の処理（elsifで分岐することで明示的に次フレームがストライクの処理を表す）
     elsif next_frame.strike?
