@@ -8,7 +8,7 @@ class Game
     sepalated_score = separate_game_to_frame(all_score)
     @frames = sepalated_score.map { |s| Frame.new(*s) }
   end
-  
+
   def score
     after_adjustment = @frames.map.with_index do |frame, i|
       if frame.spare?
@@ -49,7 +49,7 @@ class Game
   def sum_spare_score(frame, next_frame)
     frame.score + next_frame&.first_shot&.score.to_i
   end
-  
+
   def sum_strike_score(frame, next_frame = nil, after_next_frame = nil)
     # ラストフレームの処理
     if @frames[-1] == frame
