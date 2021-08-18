@@ -17,11 +17,7 @@ class Frame
   end
 
   def spare?
-    if @first_shot.score + @second_shot.score == 10 && @second_shot.score != 0
-      true
-    else
-      false
-    end
+    @first_shot.score + @second_shot.score == 10 && @second_shot.score != 0
   end
 
   def strike?
