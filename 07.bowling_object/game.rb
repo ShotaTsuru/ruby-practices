@@ -34,11 +34,11 @@ class Game
     game_score.each do |s|
       frame << s
       # 2shot目もframeに入れて欲しい場合nextで2投目処理へnextする。
-      # frameが２shot入っていなくストライクではないとき、もしくは10フレーム目
+      # frameが２shot入っていなくストライクではないとき、もしくは10フレーム目はここで処理をループさせる
       next if frame.length != 2 && s != 'X' || frames.length > 9
 
       frames << frame
-      # 10フレーム目の処理は3投目もframeに入れるためnext処理
+      # frames.lengthが9の時のframesに10フレーム目が入った時点で10フレーム目の２投目を入れる為に処理をnextする。
       next if frames.length == 10
 
       frame = []
