@@ -45,8 +45,14 @@ class FileEntry
     self
   end
 
+  def display_file_detail
+    self.size = self.size.to_s.rjust(5, ' ')
+    self.nlink = self.nlink.to_s.rjust(2, ' ')
+    puts "#{self.permission}  #{self.nlink} #{self.user}  #{self.group} #{self.size} #{self.time.join(' ')} #{self.file_name}"
+  end
+
   private
-  
+
   def decide_permission(number)
     {
       '0' => '---',

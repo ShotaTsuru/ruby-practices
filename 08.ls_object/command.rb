@@ -54,9 +54,7 @@ class Command
     total_blocks = files_name.map(&:blocks).sum
     puts "total #{total_blocks}"
     files_name.each do |x|
-      x.size = x.size.to_s.rjust(5, ' ')
-      x.nlink = x.nlink.to_s.rjust(2, ' ')
-      puts "#{x.permission}  #{x.nlink} #{x.user}  #{x.group} #{x.size} #{x.time.join(' ')} #{x.file_name}"
+      x.display_file_detail
     end
   end
 end
