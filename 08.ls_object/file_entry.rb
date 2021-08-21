@@ -25,7 +25,7 @@ class FileEntry
 
   def change_to_permission_symbolic
     symbolic = []
-    case self.type
+    case type
     when 'directory'
       permission = 'd'
     when 'file'
@@ -46,9 +46,9 @@ class FileEntry
   end
 
   def display_file_detail
-    self.size = self.size.to_s.rjust(5, ' ')
-    self.nlink = self.nlink.to_s.rjust(2, ' ')
-    puts "#{self.permission}  #{self.nlink} #{self.user}  #{self.group} #{self.size} #{self.time.join(' ')} #{self.file_name}"
+    self.size = size.to_s.rjust(5, ' ')
+    self.nlink = nlink.to_s.rjust(2, ' ')
+    puts "#{permission}  #{nlink} #{user}  #{group} #{size} #{time.join(' ')} #{file_name}"
   end
 
   private

@@ -48,13 +48,9 @@ class Command
   end
 
   def exec_l_opt(files_name)
-    files_name.map do |file|
-      file.change_to_permission_symbolic
-    end
+    files_name.map(&:change_to_permission_symbolic)
     total_blocks = files_name.map(&:blocks).sum
     puts "total #{total_blocks}"
-    files_name.each do |x|
-      x.display_file_detail
-    end
+    files_name.each(&:display_file_detail)
   end
 end
