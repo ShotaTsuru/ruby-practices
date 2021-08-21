@@ -22,4 +22,41 @@ class FileEntry
     @file_name = file # ファイル名
     @blocks = file_status.blocks # ブロックサイズ
   end
+
+  def change_to_permission_symbolic
+    symbolic = []
+    case self.type
+    when 'directory'
+      permission = 'd'
+    when 'file'
+      permission = '-'
+    when 'link'
+      permission = 'l'
+    end
+    self.permission.insert(0, '0') if self.permission.length != 6
+    results = /\d{3}(\d)(\d)(\d)/.match(self.permission).captures
+
+    symbolic << permission
+    symbolic << decide_permission(results[0])
+    symbolic << decide_permission(results[1])
+    symbolic << decide_permission(results[2])
+    change_result = symbolic.join
+    self.permission = change_result
+    self
+  end
+
+  private
+  
+  def decide_permission(number)
+    {
+      '0' => '---',
+      '1' => '--x',
+      '2' => '-w-',
+      '3' => '-wx',
+      '4' => 'r--',
+      '5' => 'r-x',
+      '6' => 'rw-',
+      '7' => 'rwx'
+    }[number]
+  end
 end
