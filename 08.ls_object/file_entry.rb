@@ -3,13 +3,20 @@
 require 'etc'
 
 class FileEntry
-  attr_reader :type, :user, :group, :time, :file_name, :blocks
-  attr_accessor :permission, :size, :nlink
+  attr_reader :type, :user, :group, :time, :file_name, :blocks, :permission, :size, :nlink
 
   def initialize(file)
     file_status = File::Stat.new(file)
     extract_status(file_status, file)
   end
+
+  def display_file_detail
+    only_display_size = size.to_s.rjust(5, ' ')
+    only_display_nlink = nlink.to_s.rjust(2, ' ')
+    puts "#{permission}  #{only_display_nlink} #{user}  #{group} #{only_display_size} #{time.join(' ')} #{file_name}"
+  end
+
+  private
 
   def extract_status(file_status, file)
     @type = File.ftype(file) # ファイルタイプ
@@ -42,14 +49,6 @@ class FileEntry
     symbolic << decide_permission(results[2])
     symbolic.join
   end
-
-  def display_file_detail
-    only_display_size = size.to_s.rjust(5, ' ')
-    only_display_nlink = nlink.to_s.rjust(2, ' ')
-    puts "#{permission}  #{only_display_nlink} #{user}  #{group} #{only_display_size} #{time.join(' ')} #{file_name}"
-  end
-
-  private
 
   def decide_permission(number)
     {
