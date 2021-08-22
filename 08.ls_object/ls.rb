@@ -3,8 +3,8 @@
 
 require 'etc'
 require 'optparse'
-require './file_entry'
-require './command'
+require_relative './file_entry'
+require_relative './command'
 
 if $PROGRAM_NAME == __FILE__
 

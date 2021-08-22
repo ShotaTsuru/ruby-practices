@@ -37,7 +37,7 @@ class Command
       row_num.times do |i|
         # 表示させるファイル名の入った配列の中身が最後の一個であるが、一行目が３列作れてない時の処理
         # わかりずらいコードなので変更した方がいいでしょうか？
-        rows[0] << files_name.shift if rows[0].length != 3 && files_name.length == 1
+        rows[0] << files_name.shift if rows[0].length != COLUMN && files_name.length == 1
         rows[i] << files_name.shift unless files_name.empty?
       end
     end
