@@ -46,9 +46,9 @@ class FileEntry
   end
 
   def display_file_detail
-    self.size = size.to_s.rjust(5, ' ')
-    self.nlink = nlink.to_s.rjust(2, ' ')
-    puts "#{permission}  #{nlink} #{user}  #{group} #{size} #{time.join(' ')} #{file_name}"
+    only_display_size = size.to_s.rjust(5, ' ')
+    only_display_nlink = nlink.to_s.rjust(2, ' ')
+    puts "#{permission}  #{only_display_nlink} #{user}  #{group} #{only_display_size} #{time.join(' ')} #{file_name}"
   end
 
   private
