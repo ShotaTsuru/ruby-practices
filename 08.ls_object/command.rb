@@ -26,12 +26,10 @@ class Command
   end
 
   def exec_default(files_name)
-    rows = []
+
     files_num = files_name.length
     row_num = (files_num / COLUMN.to_f).ceil
-    row_num.times do
-      rows << []
-    end
+    rows = Array.new(row_num) { [] }
 
     until files_name.empty?
       row_num.times do |i|
