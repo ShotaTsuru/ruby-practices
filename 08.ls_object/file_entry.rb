@@ -40,9 +40,7 @@ class FileEntry
     symbolic << decide_permission(results[0])
     symbolic << decide_permission(results[1])
     symbolic << decide_permission(results[2])
-    change_result = symbolic.join
-    mode = change_result
-    mode
+    symbolic.join
   end
 
   def display_file_detail

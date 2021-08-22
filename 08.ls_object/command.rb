@@ -26,7 +26,6 @@ class Command
   end
 
   def exec_default(files_name)
-
     files_num = files_name.length
     row_num = (files_num / COLUMN.to_f).ceil
     rows = Array.new(row_num) { [] }
