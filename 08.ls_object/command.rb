@@ -33,8 +33,6 @@ class Command
 
     until files_name.empty?
       row_num.times do |i|
-        # 表示させるファイル名の入った配列の中身が最後の一個であるが、一行目が３列作れてない時の処理
-        # わかりずらいコードなので変更した方がいいでしょうか？
         rows[0] << files_name.shift if rows[0].length != COLUMN && files_name.length == 1
         rows[i] << files_name.shift unless files_name.empty?
       end
@@ -46,7 +44,6 @@ class Command
   end
 
   def exec_l_opt(files_name)
-    files_name.map(&:change_to_permission_symbolic)
     total_blocks = files_name.map(&:blocks).sum
     puts "total #{total_blocks}"
     files_name.each(&:display_file_detail)

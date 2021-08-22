@@ -13,7 +13,7 @@ class FileEntry
 
   def extract_status(file_status, file)
     @type = File.ftype(file) # ファイルタイプ
-    @permission = file_status.mode.to_s(8) # 権限
+    @permission = change_to_permission_symbolic(file_status.mode.to_s(8)) # 権限
     @nlink = file_status.nlink # ハードリンクの数
     @user = Etc.getpwuid(file_status.uid).name # オーナー名
     @group = Etc.getgrgid(file_status.gid).name # グループ名
@@ -23,7 +23,7 @@ class FileEntry
     @blocks = file_status.blocks # ブロックサイズ
   end
 
-  def change_to_permission_symbolic
+  def change_to_permission_symbolic(mode)
     symbolic = []
     case type
     when 'directory'
@@ -33,16 +33,16 @@ class FileEntry
     when 'link'
       permission = 'l'
     end
-    self.permission.insert(0, '0') if self.permission.length != 6
-    results = /\d{3}(\d)(\d)(\d)/.match(self.permission).captures
+    mode.insert(0, '0') if mode.length != 6
+    results = /\d{3}(\d)(\d)(\d)/.match(mode).captures
 
     symbolic << permission
     symbolic << decide_permission(results[0])
     symbolic << decide_permission(results[1])
     symbolic << decide_permission(results[2])
     change_result = symbolic.join
-    self.permission = change_result
-    self
+    mode = change_result
+    mode
   end
 
   def display_file_detail
